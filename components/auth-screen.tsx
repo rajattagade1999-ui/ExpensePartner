@@ -117,6 +117,24 @@ export default function AuthScreen() {
         : await signUp(email, password)
 
       if ('error' in result) {
+        // Check specifically for "User already exists" error during signup
+        const errorLower = result.error.toLowerCase()
+        const isUserExistsError = 
+          errorLower.includes('already been registered') ||
+          errorLower.includes('already exists') ||
+          errorLower.includes('email_exists') ||
+          errorLower.includes('user already registered')
+        
+        if (activeTab === 'signup' && isUserExistsError) {
+          toast.error('Account already exists! Please log in instead.')
+          setSignupInProgress(false)
+          setIsLoading(false)
+          // Switch to login tab for convenience
+          setActiveTab('login')
+          return
+        }
+        
+        // Generic error for other cases
         toast.error(result.error)
         // Clear signup flag on error
         if (activeTab === 'signup') {
